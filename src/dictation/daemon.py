@@ -3,6 +3,7 @@ import os
 import signal
 import socket
 import subprocess
+import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -167,8 +168,17 @@ class DictationDaemon:
                 pass
 
 
-def _setup_cuda_ld_path():
-    """Add NVIDIA pip package lib dirs to LD_LIBRARY_PATH if present."""
+def _ensure_cuda_ld_path():
+    """Re-exec with LD_LIBRARY_PATH pointing to NVIDIA pip package libs.
+
+    Setting LD_LIBRARY_PATH in Python is too late - the dynamic linker
+    has already resolved shared libraries by the time Python runs. So we
+    detect the needed paths, set the env var, and os.execv ourselves.
+    The _DICTATION_CUDA_READY sentinel prevents infinite re-exec loops.
+    """
+    if os.environ.get("_DICTATION_CUDA_READY"):
+        return
+
     import site
     site_packages = site.getsitepackages()
     if not site_packages:
@@ -177,9 +187,13 @@ def _setup_cuda_ld_path():
     if not nvidia_base.is_dir():
         return
     lib_dirs = [str(p) for p in nvidia_base.glob("*/lib") if p.is_dir()]
-    if lib_dirs:
-        existing = os.environ.get("LD_LIBRARY_PATH", "")
-        os.environ["LD_LIBRARY_PATH"] = ":".join(lib_dirs + ([existing] if existing else []))
+    if not lib_dirs:
+        return
+
+    existing = os.environ.get("LD_LIBRARY_PATH", "")
+    os.environ["LD_LIBRARY_PATH"] = ":".join(lib_dirs + ([existing] if existing else []))
+    os.environ["_DICTATION_CUDA_READY"] = "1"
+    os.execv(sys.executable, [sys.executable] + sys.argv)
 
 
 def main():
@@ -187,7 +201,7 @@ def main():
         level=logging.INFO,
         format="%(asctime)s %(levelname)s %(message)s",
     )
-    _setup_cuda_ld_path()
+    _ensure_cuda_ld_path()
     cfg = get_config()
 
     daemon = DictationDaemon(
