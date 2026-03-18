@@ -3,7 +3,7 @@ import threading
 
 import pytest
 
-from dictation.client import send_command, DaemonNotRunningError, DaemonTimeoutError
+from murmur.client import send_command, DaemonNotRunningError, DaemonTimeoutError
 
 
 @pytest.fixture

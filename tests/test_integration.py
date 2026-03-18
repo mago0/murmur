@@ -6,22 +6,22 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from dictation.daemon import DictationDaemon
-from dictation.client import send_command
+from murmur.daemon import MurmurDaemon
+from murmur.client import send_command
 
 
 @pytest.fixture
 def integration_env(tmp_path):
     """Spin up a daemon with mocked transcriber and return paths."""
-    sock_path = str(tmp_path / "dictation.sock")
+    sock_path = str(tmp_path / "murmur.sock")
     log_path = str(tmp_path / "history.log")
 
-    with patch("dictation.daemon.Transcriber") as mock_cls:
+    with patch("murmur.daemon.Transcriber") as mock_cls:
         mock_transcriber = MagicMock()
         mock_transcriber.transcribe.return_value = "the quick brown fox"
         mock_cls.return_value = mock_transcriber
 
-        daemon = DictationDaemon(
+        daemon = MurmurDaemon(
             model="base.en",
             device="cpu",
             compute_type="int8",
@@ -46,7 +46,7 @@ def integration_env(tmp_path):
         t.join(timeout=3)
 
 
-@patch("dictation.daemon.subprocess.run")
+@patch("murmur.daemon.subprocess.run")
 def test_full_transcription_flow(mock_run, integration_env):
     """Client sends transcribe, daemon processes, result appears in log."""
     env = integration_env
@@ -68,7 +68,7 @@ def test_status_while_idle(integration_env):
     assert resp == "ready"
 
 
-@patch("dictation.daemon.subprocess.run")
+@patch("murmur.daemon.subprocess.run")
 def test_multiple_transcriptions(mock_run, integration_env):
     """Multiple transcriptions append to the same log."""
     env = integration_env

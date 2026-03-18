@@ -1,5 +1,5 @@
 from unittest.mock import MagicMock, patch
-from dictation.transcribe import Transcriber
+from murmur.transcribe import Transcriber
 
 
 class FakeSegment:
@@ -7,7 +7,7 @@ class FakeSegment:
         self.text = text
 
 
-@patch("dictation.transcribe.WhisperModel")
+@patch("murmur.transcribe.WhisperModel")
 def test_transcribe_joins_segments(mock_model_cls):
     """Transcriber joins segment texts with spaces."""
     mock_model = MagicMock()
@@ -22,7 +22,7 @@ def test_transcribe_joins_segments(mock_model_cls):
     assert result == "Hello world"
 
 
-@patch("dictation.transcribe.WhisperModel")
+@patch("murmur.transcribe.WhisperModel")
 def test_transcribe_empty_audio(mock_model_cls):
     """Transcriber returns empty string for silence."""
     mock_model = MagicMock()
@@ -34,7 +34,7 @@ def test_transcribe_empty_audio(mock_model_cls):
     assert result == ""
 
 
-@patch("dictation.transcribe.WhisperModel")
+@patch("murmur.transcribe.WhisperModel")
 def test_model_loaded_once(mock_model_cls):
     """Model is loaded at construction, not per-transcription."""
     mock_model_cls.return_value.transcribe.return_value = (iter([]), MagicMock())

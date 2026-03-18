@@ -2,7 +2,7 @@ import socket
 import subprocess
 import sys
 
-from dictation.config import get_config
+from murmur.config import get_config
 
 
 class DaemonNotRunningError(Exception):
@@ -47,7 +47,7 @@ def main():
     args = sys.argv[1:]
 
     if not args:
-        print("Usage: dictation-client <command> [args...]", file=sys.stderr)
+        print("Usage: murmur-client <command> [args...]", file=sys.stderr)
         sys.exit(1)
 
     command = " ".join(args)
@@ -56,8 +56,8 @@ def main():
         response = send_command(cfg.socket_path, command)
         print(response)
     except DaemonNotRunningError:
-        _notify("Dictation", "Daemon not running")
+        _notify("Murmur", "Daemon not running")
         sys.exit(1)
     except DaemonTimeoutError:
-        _notify("Dictation", "Timed out")
+        _notify("Murmur", "Timed out")
         sys.exit(1)

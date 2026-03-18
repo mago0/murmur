@@ -1,0 +1,15 @@
+[Unit]
+Description=Murmur dictation daemon (faster-whisper with GPU)
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/murmur-daemon
+Restart=on-failure
+RestartSec=3
+Environment=MURMUR_MODEL=small.en
+Environment=MURMUR_DEVICE=cuda
+Environment=MURMUR_COMPUTE_TYPE=float16
+
+[Install]
+WantedBy=graphical-session.target

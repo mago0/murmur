@@ -1,6 +1,6 @@
-# dictation
+# murmur
 
-Hotkey-triggered voice dictation for Wayland. Records audio via pw-record,
+Hotkey-triggered voice murmur for Wayland. Records audio via pw-record,
 transcribes with GPU-accelerated faster-whisper, and copies the result to the
 clipboard.
 
@@ -12,24 +12,24 @@ Three components work together:
 [Niri keybinding: Mod+Shift+D]
         |
         v
-dictate-toggle.sh    -- PID file toggle for pw-record
+murmur-toggle.sh    -- PID file toggle for pw-record
         |
         | (on stop recording)
         v
-dictation-client     -- sends "transcribe <path>" over Unix socket
+murmur-client     -- sends "transcribe <path>" over Unix socket
         |
         v
-dictation-daemon     -- faster-whisper model warm in VRAM, transcribes,
+murmur-daemon     -- faster-whisper model warm in VRAM, transcribes,
                         copies to clipboard, logs, notifies
 ```
 
-- **dictate-toggle.sh** - Shell script bound to a hotkey. Manages pw-record
+- **murmur-toggle.sh** - Shell script bound to a hotkey. Manages pw-record
   directly (start/stop via PID file). On stop, sends the audio to the daemon
-  for transcription via dictation-client.
-- **dictation-daemon** - Systemd user service. Keeps the Whisper model loaded
+  for transcription via murmur-client.
+- **murmur-daemon** - Systemd user service. Keeps the Whisper model loaded
   in GPU memory and handles transcription, clipboard copy, logging, and
   notifications.
-- **dictation-client** - Thin CLI for sending commands to the daemon over the
+- **murmur-client** - Thin CLI for sending commands to the daemon over the
   Unix socket.
 
 ## Prerequisites
@@ -50,8 +50,8 @@ pipewire-audio (or equivalent, providing pw-record)
 ## Installation
 
 ```bash
-git clone https://github.com/yourusername/dictation.git
-cd dictation
+git clone https://github.com/yourusername/murmur.git
+cd murmur
 ./install.sh
 ```
 
@@ -62,18 +62,18 @@ installs the systemd user service, and copies the toggle script to
 ## Configuration
 
 All configuration is done via environment variables. Set them in
-`~/.config/systemd/user/dictation.service.d/override.conf` using
-`systemctl --user edit dictation`.
+`~/.config/systemd/user/murmur.service.d/override.conf` using
+`systemctl --user edit murmur`.
 
 | Variable | Default | Description |
 |---|---|---|
-| `DICTATION_MODEL` | `small.en` | Whisper model name (e.g. `tiny.en`, `base.en`, `medium.en`) |
-| `DICTATION_DEVICE` | `cuda` | Inference device (`cuda` or `cpu`) |
-| `DICTATION_COMPUTE_TYPE` | `float16` | Compute type (`float16`, `int8_float16`, `int8`) |
-| `DICTATION_AUDIO_SOURCE` | *(default PipeWire source)* | PipeWire source name for pw-record |
-| `DICTATION_SOCKET` | `/run/user/$UID/dictation.sock` | Unix socket path |
-| `DICTATION_LOG` | `~/.local/share/dictation/history.log` | Path for transcription history log |
-| `DICTATION_TMPDIR` | `/tmp` | Directory for temporary WAV files and PID file |
+| `MURMUR_MODEL` | `small.en` | Whisper model name (e.g. `tiny.en`, `base.en`, `medium.en`) |
+| `MURMUR_DEVICE` | `cuda` | Inference device (`cuda` or `cpu`) |
+| `MURMUR_COMPUTE_TYPE` | `float16` | Compute type (`float16`, `int8_float16`, `int8`) |
+| `MURMUR_AUDIO_SOURCE` | *(default PipeWire source)* | PipeWire source name for pw-record |
+| `MURMUR_SOCKET` | `/run/user/$UID/murmur.sock` | Unix socket path |
+| `MURMUR_LOG` | `~/.local/share/murmur/history.log` | Path for transcription history log |
+| `MURMUR_TMPDIR` | `/tmp` | Directory for temporary WAV files and PID file |
 
 ## Niri Keybinding
 
@@ -81,7 +81,7 @@ Add to `~/.config/niri/config.kdl`:
 
 ```kdl
 binds {
-    Mod+Shift+D { spawn "dictate-toggle.sh"; }
+    Mod+Shift+D { spawn "murmur-toggle.sh"; }
 }
 ```
 
@@ -89,7 +89,7 @@ binds {
 
 1. Start the daemon (enabled automatically by the installer):
    ```bash
-   systemctl --user start dictation
+   systemctl --user start murmur
    ```
 
 2. Press `Mod+Shift+D` to begin recording. A notification will appear.
@@ -100,26 +100,26 @@ binds {
 4. Paste as normal (`Ctrl+V` or middle-click).
 
 Transcriptions are appended to the history log at
-`~/.local/share/dictation/history.log`.
+`~/.local/share/murmur/history.log`.
 
 ## Troubleshooting
 
 View live daemon logs:
 
 ```bash
-journalctl --user -u dictation -f
+journalctl --user -u murmur -f
 ```
 
 Check daemon status:
 
 ```bash
-dictation-client status
+murmur-client status
 ```
 
 Restart the daemon:
 
 ```bash
-systemctl --user restart dictation
+systemctl --user restart murmur
 ```
 
 If the model download fails on first run, check that you have internet access

@@ -1,10 +1,10 @@
 #!/bin/bash
-# install.sh - Install the dictation tool
+# install.sh - Install murmur dictation tool
 # Idempotent - safe to run multiple times.
 
 set -euo pipefail
 
-VENV_DIR="$HOME/.local/share/dictation/venv"
+VENV_DIR="$HOME/.local/share/murmur/venv"
 BIN_DIR="$HOME/.local/bin"
 SYSTEMD_DIR="$HOME/.config/systemd/user"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -47,38 +47,38 @@ uv venv "$VENV_DIR" --python ">=3.11" -q
 ok "Venv ready at $VENV_DIR"
 
 echo ""
-echo "Installing dictation package..."
+echo "Installing murmur package..."
 uv pip install "$SCRIPT_DIR[cuda]" --python "$VENV_DIR/bin/python" -q
 ok "Package installed"
 
-# 4. Symlink entry points
+# 3. Symlink entry points
 echo ""
 echo "Creating symlinks..."
 mkdir -p "$BIN_DIR"
 
-for bin in dictation-daemon dictation-client; do
+for bin in murmur-daemon murmur-client; do
     ln -sf "$VENV_DIR/bin/$bin" "$BIN_DIR/$bin"
     ok "Linked $bin -> $BIN_DIR/$bin"
 done
 
-ln -sf "$SCRIPT_DIR/scripts/dictate-toggle.sh" "$BIN_DIR/dictate-toggle.sh"
-ok "Linked dictate-toggle.sh -> $BIN_DIR/dictate-toggle.sh"
+ln -sf "$SCRIPT_DIR/scripts/murmur-toggle.sh" "$BIN_DIR/murmur-toggle.sh"
+ok "Linked murmur-toggle.sh -> $BIN_DIR/murmur-toggle.sh"
 
-# 5. Create data directory
-mkdir -p "$HOME/.local/share/dictation"
+# 4. Create data directory
+mkdir -p "$HOME/.local/share/murmur"
 ok "Data directory ready"
 
-# 6. Install systemd service
+# 5. Install systemd service
 echo ""
 echo "Installing systemd service..."
 mkdir -p "$SYSTEMD_DIR"
-cp "$SCRIPT_DIR/systemd/dictation.service" "$SYSTEMD_DIR/dictation.service"
+cp "$SCRIPT_DIR/systemd/murmur.service" "$SYSTEMD_DIR/murmur.service"
 systemctl --user daemon-reload
 ok "Service installed"
 
-# 7. Enable and start
-systemctl --user enable dictation.service
-systemctl --user restart dictation.service
+# 6. Enable and start
+systemctl --user enable murmur.service
+systemctl --user restart murmur.service
 ok "Service enabled and started"
 
 echo ""
@@ -88,10 +88,10 @@ echo "============================================"
 echo ""
 echo "Add this to your Niri config (~/.config/niri/config.kdl):"
 echo ""
-echo '  Mod+Shift+D { spawn "dictate-toggle.sh"; }'
+echo '  Mod+Shift+D { spawn "murmur-toggle.sh"; }'
 echo ""
 echo "Then reload: niri msg action reload-config"
 echo ""
 echo "First run will download the model (~500MB for small.en)."
-echo "Watch progress: journalctl --user -u dictation -f"
+echo "Watch progress: journalctl --user -u murmur -f"
 echo ""

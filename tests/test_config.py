@@ -1,6 +1,6 @@
 import os
 import pytest
-from dictation.config import get_config
+from murmur.config import get_config
 
 
 def test_defaults():
@@ -9,16 +9,16 @@ def test_defaults():
     assert cfg.model == "small.en"
     assert cfg.device == "cuda"
     assert cfg.compute_type == "float16"
-    assert cfg.socket_path.endswith("dictation.sock")
+    assert cfg.socket_path.endswith("murmur.sock")
     assert cfg.tmpdir == "/tmp"
     assert "history.log" in cfg.log_path
 
 
 def test_env_override(monkeypatch):
     """Env vars override defaults."""
-    monkeypatch.setenv("DICTATION_MODEL", "base.en")
-    monkeypatch.setenv("DICTATION_DEVICE", "cpu")
-    monkeypatch.setenv("DICTATION_COMPUTE_TYPE", "int8")
+    monkeypatch.setenv("MURMUR_MODEL", "base.en")
+    monkeypatch.setenv("MURMUR_DEVICE", "cpu")
+    monkeypatch.setenv("MURMUR_COMPUTE_TYPE", "int8")
     cfg = get_config()
     assert cfg.model == "base.en"
     assert cfg.device == "cpu"

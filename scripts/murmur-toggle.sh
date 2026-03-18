@@ -1,20 +1,20 @@
 #!/bin/bash
-# dictate-toggle.sh - Toggle voice dictation recording
+# murmur-toggle.sh - Toggle voice dictation recording
 # Press once to start recording, press again to stop and transcribe.
 # Result is copied to clipboard.
 
 set -euo pipefail
 
 # Defaults (same as Python config.py - keep in sync)
-DICTATION_TMPDIR="${DICTATION_TMPDIR:-/tmp}"
-DICTATION_AUDIO_SOURCE="${DICTATION_AUDIO_SOURCE:-alsa_input.usb-HP__Inc_HyperX_Cloud_II_Core_Wireless-00.mono-fallback}"
-DICTATION_SOCKET="${DICTATION_SOCKET:-/run/user/$(id -u)/dictation.sock}"
+MURMUR_TMPDIR="${MURMUR_TMPDIR:-/tmp}"
+MURMUR_AUDIO_SOURCE="${MURMUR_AUDIO_SOURCE:-alsa_input.usb-HP__Inc_HyperX_Cloud_II_Core_Wireless-00.mono-fallback}"
+MURMUR_SOCKET="${MURMUR_SOCKET:-/run/user/$(id -u)/murmur.sock}"
 
-PIDFILE="$DICTATION_TMPDIR/dictation.pid"
-AUDIOFILE="$DICTATION_TMPDIR/dictation-capture.wav"
+PIDFILE="$MURMUR_TMPDIR/murmur.pid"
+AUDIOFILE="$MURMUR_TMPDIR/murmur-capture.wav"
 
 notify() {
-    notify-send "Dictation" "$1" -t "${2:-2000}" 2>/dev/null || true
+    notify-send "Murmur" "$1" -t "${2:-2000}" 2>/dev/null || true
 }
 
 # Check for stale PID file
@@ -46,14 +46,14 @@ if [ -f "$PIDFILE" ]; then
     notify "Transcribing..." 1500
 
     # Send to daemon
-    dictation-client transcribe "$AUDIOFILE"
+    murmur-client transcribe "$AUDIOFILE"
 
 else
     # --- START RECORDING ---
     notify "Recording..." 1500
 
     pw-record \
-        --target="$DICTATION_AUDIO_SOURCE" \
+        --target="$MURMUR_AUDIO_SOURCE" \
         --format=s16 \
         --rate=16000 \
         --channels=1 \

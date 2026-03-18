@@ -7,13 +7,13 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from dictation.config import get_config
-from dictation.transcribe import Transcriber
+from murmur.config import get_config
+from murmur.transcribe import Transcriber
 
-logger = logging.getLogger("dictation")
+logger = logging.getLogger("murmur")
 
 
-class DictationDaemon:
+class MurmurDaemon:
     def __init__(
         self,
         model: str,
@@ -133,7 +133,7 @@ class DictationDaemon:
         display = text[:200] + "..." if len(text) > 200 else text
         try:
             subprocess.run(
-                ["notify-send", "Dictation", display, "-t", "4000"],
+                ["notify-send", "Murmur", display, "-t", "4000"],
                 check=False, timeout=5,
             )
         except (subprocess.SubprocessError, FileNotFoundError):
@@ -142,7 +142,7 @@ class DictationDaemon:
     def _notify_empty(self):
         try:
             subprocess.run(
-                ["notify-send", "Dictation", "Nothing transcribed", "-t", "2000"],
+                ["notify-send", "Murmur", "Nothing transcribed", "-t", "2000"],
                 check=False, timeout=5,
             )
         except (subprocess.SubprocessError, FileNotFoundError):
@@ -174,9 +174,9 @@ def _ensure_cuda_ld_path():
     Setting LD_LIBRARY_PATH in Python is too late - the dynamic linker
     has already resolved shared libraries by the time Python runs. So we
     detect the needed paths, set the env var, and os.execv ourselves.
-    The _DICTATION_CUDA_READY sentinel prevents infinite re-exec loops.
+    The _MURMUR_CUDA_READY sentinel prevents infinite re-exec loops.
     """
-    if os.environ.get("_DICTATION_CUDA_READY"):
+    if os.environ.get("_MURMUR_CUDA_READY"):
         return
 
     import site
@@ -192,7 +192,7 @@ def _ensure_cuda_ld_path():
 
     existing = os.environ.get("LD_LIBRARY_PATH", "")
     os.environ["LD_LIBRARY_PATH"] = ":".join(lib_dirs + ([existing] if existing else []))
-    os.environ["_DICTATION_CUDA_READY"] = "1"
+    os.environ["_MURMUR_CUDA_READY"] = "1"
     os.execv(sys.executable, [sys.executable] + sys.argv)
 
 
@@ -204,7 +204,7 @@ def main():
     _ensure_cuda_ld_path()
     cfg = get_config()
 
-    daemon = DictationDaemon(
+    daemon = MurmurDaemon(
         model=cfg.model,
         device=cfg.device,
         compute_type=cfg.compute_type,

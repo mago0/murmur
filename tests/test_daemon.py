@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from dictation.daemon import DictationDaemon
+from murmur.daemon import MurmurDaemon
 
 
 @pytest.fixture
@@ -21,11 +21,11 @@ def log_path(tmp_path):
 @pytest.fixture
 def daemon(sock_path, log_path):
     """Create a daemon with a mocked transcriber."""
-    with patch("dictation.daemon.Transcriber") as mock_cls:
+    with patch("murmur.daemon.Transcriber") as mock_cls:
         mock_transcriber = MagicMock()
         mock_transcriber.transcribe.return_value = "hello world"
         mock_cls.return_value = mock_transcriber
-        d = DictationDaemon(
+        d = MurmurDaemon(
             model="base.en",
             device="cpu",
             compute_type="int8",
@@ -56,7 +56,7 @@ def test_status_ready(daemon, sock_path):
     assert resp == "ready"
 
 
-@patch("dictation.daemon.subprocess.run")
+@patch("murmur.daemon.subprocess.run")
 def test_transcribe_command(mock_run, daemon, sock_path, log_path, tmp_path):
     """Daemon transcribes audio and returns OK response."""
     audio = tmp_path / "test.wav"
@@ -76,7 +76,7 @@ def test_transcribe_command(mock_run, daemon, sock_path, log_path, tmp_path):
     assert "hello world" in line
 
 
-@patch("dictation.daemon.subprocess.run")
+@patch("murmur.daemon.subprocess.run")
 def test_transcribe_copies_to_clipboard(mock_run, daemon, sock_path, tmp_path):
     """Daemon calls wl-copy with the transcribed text."""
     audio = tmp_path / "test.wav"
@@ -95,7 +95,7 @@ def test_transcribe_copies_to_clipboard(mock_run, daemon, sock_path, tmp_path):
     assert wl_copy_calls[0][1]["input"] == b"hello world"
 
 
-@patch("dictation.daemon.subprocess.run")
+@patch("murmur.daemon.subprocess.run")
 def test_transcribe_empty_returns_empty(mock_run, daemon, sock_path, tmp_path):
     """Daemon returns EMPTY when transcription produces no text."""
     # Override the mock transcriber to return empty
