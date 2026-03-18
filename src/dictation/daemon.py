@@ -3,7 +3,6 @@ import os
 import signal
 import socket
 import subprocess
-import sys
 from datetime import datetime
 from pathlib import Path
 

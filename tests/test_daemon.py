@@ -1,6 +1,5 @@
 import os
 import socket
-import tempfile
 import threading
 from unittest.mock import MagicMock, patch
 
