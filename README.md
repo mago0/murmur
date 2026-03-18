@@ -1,6 +1,6 @@
 # murmur
 
-Hotkey-triggered voice murmur for Wayland. Records audio via pw-record,
+Hotkey-triggered voice dictation for Wayland. Records audio via pw-record,
 transcribes with GPU-accelerated faster-whisper, and copies the result to the
 clipboard.
 
@@ -9,7 +9,7 @@ clipboard.
 Three components work together:
 
 ```
-[Niri keybinding: Mod+Shift+D]
+[Niri keybinding: Mod+D]
         |
         v
 murmur-toggle.sh    -- PID file toggle for pw-record
@@ -81,7 +81,7 @@ Add to `~/.config/niri/config.kdl`:
 
 ```kdl
 binds {
-    Mod+Shift+D { spawn "murmur-toggle.sh"; }
+    Mod+D { spawn "murmur-toggle.sh"; }
 }
 ```
 
@@ -92,9 +92,9 @@ binds {
    systemctl --user start murmur
    ```
 
-2. Press `Mod+Shift+D` to begin recording. A notification will appear.
+2. Press `Mod+D` to begin recording. A notification will appear.
 
-3. Press `Mod+Shift+D` again to stop recording and transcribe. The transcribed
+3. Press `Mod+D` again to stop recording and transcribe. The transcribed
    text is copied to the clipboard automatically.
 
 4. Paste as normal (`Ctrl+V` or middle-click).

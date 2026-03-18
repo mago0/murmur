@@ -88,7 +88,7 @@ echo "============================================"
 echo ""
 echo "Add this to your Niri config (~/.config/niri/config.kdl):"
 echo ""
-echo '  Mod+Shift+D { spawn "murmur-toggle.sh"; }'
+echo '  Mod+D { spawn "murmur-toggle.sh"; }'
 echo ""
 echo "Then reload: niri msg action reload-config"
 echo ""
