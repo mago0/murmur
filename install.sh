@@ -31,12 +31,20 @@ for cmd in pw-record wl-copy notify-send; do
     fi
 done
 
+# Check python3 venv support
+if python3 -m venv --help &>/dev/null; then
+    ok "python3 venv"
+else
+    fail "python3 venv not available"
+    MISSING=1
+fi
+
 if [ "$MISSING" -eq 1 ]; then
     echo ""
     echo "Install missing dependencies:"
-    echo "  sudo apt install pipewire wl-clipboard libnotify-bin"
+    echo "  sudo apt install pipewire wl-clipboard libnotify-bin python3-venv"
     echo ""
-    echo "Or equivalent for your distro."
+    echo "Or equivalent for your distro (e.g. python3.13-venv on Debian)."
     exit 1
 fi
 
