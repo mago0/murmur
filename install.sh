@@ -22,7 +22,7 @@ fail() { echo -e "${RED}[fail]${NC} $1"; }
 echo "Checking system dependencies..."
 MISSING=0
 
-for cmd in pw-record wl-copy notify-send; do
+for cmd in pw-record wl-copy notify-send uv; do
     if command -v "$cmd" &>/dev/null; then
         ok "$cmd found"
     else
@@ -31,38 +31,24 @@ for cmd in pw-record wl-copy notify-send; do
     fi
 done
 
-# Check python3 venv support
-if python3 -m venv --help &>/dev/null; then
-    ok "python3 venv"
-else
-    fail "python3 venv not available"
-    MISSING=1
-fi
-
 if [ "$MISSING" -eq 1 ]; then
     echo ""
     echo "Install missing dependencies:"
-    echo "  sudo apt install pipewire wl-clipboard libnotify-bin python3-venv"
+    echo "  sudo apt install pipewire wl-clipboard libnotify-bin"
+    echo "  curl -LsSf https://astral.sh/uv/install.sh | sh"
     echo ""
-    echo "Or equivalent for your distro (e.g. python3.13-venv on Debian)."
     exit 1
 fi
 
-# 2. Create venv
+# 2. Create venv and install package
 echo ""
 echo "Setting up Python environment..."
-if [ -d "$VENV_DIR" ]; then
-    ok "Venv exists at $VENV_DIR"
-else
-    python3 -m venv "$VENV_DIR"
-    ok "Created venv at $VENV_DIR"
-fi
+uv venv "$VENV_DIR" --python ">=3.11" -q
+ok "Venv ready at $VENV_DIR"
 
-# 3. Install package
 echo ""
 echo "Installing dictation package..."
-"$VENV_DIR/bin/pip" install --upgrade pip -q
-"$VENV_DIR/bin/pip" install "$SCRIPT_DIR" -q
+uv pip install "$SCRIPT_DIR" --python "$VENV_DIR/bin/python" -q
 ok "Package installed"
 
 # 4. Symlink entry points
