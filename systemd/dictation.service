@@ -1,0 +1,15 @@
+[Unit]
+Description=Dictation daemon (faster-whisper with GPU)
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/dictation-daemon
+Restart=on-failure
+RestartSec=3
+Environment=DICTATION_MODEL=small.en
+Environment=DICTATION_DEVICE=cuda
+Environment=DICTATION_COMPUTE_TYPE=float16
+
+[Install]
+WantedBy=graphical-session.target
