@@ -7,7 +7,7 @@ Type=simple
 ExecStart=%h/.local/bin/murmur-daemon
 Restart=on-failure
 RestartSec=3
-Environment=MURMUR_MODEL=small.en
+Environment=MURMUR_MODEL=medium.en
 Environment=MURMUR_DEVICE=cuda
 Environment=MURMUR_COMPUTE_TYPE=float16
 
