@@ -91,6 +91,9 @@ class DictationDaemon:
                     else:
                         self._notify_empty()
                         conn.sendall(b"EMPTY\n")
+                except Exception as e:
+                    logger.error("Transcription failed: %s", e)
+                    conn.sendall(f"ERR transcription failed: {e}\n".encode())
                 finally:
                     self._busy = False
 
@@ -164,11 +167,27 @@ class DictationDaemon:
                 pass
 
 
+def _setup_cuda_ld_path():
+    """Add NVIDIA pip package lib dirs to LD_LIBRARY_PATH if present."""
+    import site
+    site_packages = site.getsitepackages()
+    if not site_packages:
+        return
+    nvidia_base = Path(site_packages[0]) / "nvidia"
+    if not nvidia_base.is_dir():
+        return
+    lib_dirs = [str(p) for p in nvidia_base.glob("*/lib") if p.is_dir()]
+    if lib_dirs:
+        existing = os.environ.get("LD_LIBRARY_PATH", "")
+        os.environ["LD_LIBRARY_PATH"] = ":".join(lib_dirs + ([existing] if existing else []))
+
+
 def main():
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s %(levelname)s %(message)s",
     )
+    _setup_cuda_ld_path()
     cfg = get_config()
 
     daemon = DictationDaemon(

@@ -48,7 +48,7 @@ ok "Venv ready at $VENV_DIR"
 
 echo ""
 echo "Installing dictation package..."
-uv pip install "$SCRIPT_DIR" --python "$VENV_DIR/bin/python" -q
+uv pip install "$SCRIPT_DIR[cuda]" --python "$VENV_DIR/bin/python" -q
 ok "Package installed"
 
 # 4. Symlink entry points
