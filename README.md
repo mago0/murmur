@@ -9,26 +9,28 @@ clipboard.
 Three components work together:
 
 ```
-dictate-toggle.sh  (hotkey script)
-        |
-        | Unix socket (start/stop commands)
-        v
-dictation-daemon   (long-running service)
-        |
-        | pw-record -> WAV -> faster-whisper
-        v
-   transcription -> wl-copy -> clipboard
+[Niri keybinding: Mod+Shift+D]
         |
         v
-   history.log (~/.local/share/dictation/history.log)
+dictate-toggle.sh    -- PID file toggle for pw-record
+        |
+        | (on stop recording)
+        v
+dictation-client     -- sends "transcribe <path>" over Unix socket
+        |
+        v
+dictation-daemon     -- faster-whisper model warm in VRAM, transcribes,
+                        copies to clipboard, logs, notifies
 ```
 
-- **dictate-toggle.sh** - Shell script bound to a hotkey. Sends `start` or
-  `stop` commands to the daemon via a Unix socket.
-- **dictation-daemon** - Systemd user service. Manages recording and
-  transcription. Keeps the Whisper model loaded in GPU memory between uses.
-- **dictation-client** - CLI utility for sending commands to the daemon and
-  querying its status.
+- **dictate-toggle.sh** - Shell script bound to a hotkey. Manages pw-record
+  directly (start/stop via PID file). On stop, sends the audio to the daemon
+  for transcription via dictation-client.
+- **dictation-daemon** - Systemd user service. Keeps the Whisper model loaded
+  in GPU memory and handles transcription, clipboard copy, logging, and
+  notifications.
+- **dictation-client** - Thin CLI for sending commands to the daemon over the
+  Unix socket.
 
 ## Prerequisites
 
@@ -65,13 +67,13 @@ All configuration is done via environment variables. Set them in
 
 | Variable | Default | Description |
 |---|---|---|
-| `DICTATION_MODEL` | `base.en` | Whisper model name (e.g. `tiny.en`, `small.en`, `medium.en`) |
+| `DICTATION_MODEL` | `small.en` | Whisper model name (e.g. `tiny.en`, `base.en`, `medium.en`) |
 | `DICTATION_DEVICE` | `cuda` | Inference device (`cuda` or `cpu`) |
 | `DICTATION_COMPUTE_TYPE` | `float16` | Compute type (`float16`, `int8_float16`, `int8`) |
 | `DICTATION_AUDIO_SOURCE` | *(default PipeWire source)* | PipeWire source name for pw-record |
-| `DICTATION_SOCKET` | `$XDG_RUNTIME_DIR/dictation.sock` | Unix socket path |
-| `DICTATION_LOG` | `$XDG_DATA_HOME/dictation/history.log` | Path for transcription history log |
-| `DICTATION_TMPDIR` | `$XDG_RUNTIME_DIR` | Directory for temporary WAV files |
+| `DICTATION_SOCKET` | `/run/user/$UID/dictation.sock` | Unix socket path |
+| `DICTATION_LOG` | `~/.local/share/dictation/history.log` | Path for transcription history log |
+| `DICTATION_TMPDIR` | `/tmp` | Directory for temporary WAV files and PID file |
 
 ## Niri Keybinding
 
