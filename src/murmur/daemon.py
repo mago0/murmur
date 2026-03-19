@@ -112,10 +112,34 @@ class MurmurDaemon:
             except OSError:
                 pass
 
+    def _wayland_env(self) -> dict[str, str] | None:
+        """Build an env dict with WAYLAND_DISPLAY for Wayland-dependent tools.
+
+        Auto-detects the active socket in XDG_RUNTIME_DIR so this works
+        regardless of whether niri creates wayland-0 or wayland-1.
+        """
+        if os.environ.get("WAYLAND_DISPLAY"):
+            return None  # already set, inherit normally
+
+        runtime_dir = os.environ.get(
+            "XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}"
+        )
+        sockets = sorted(
+            p for p in Path(runtime_dir).glob("wayland-[0-9]*")
+            if not p.name.endswith(".lock")
+        )
+        if not sockets:
+            return None
+
+        env = os.environ.copy()
+        env["WAYLAND_DISPLAY"] = sockets[-1].name
+        return env
+
     def _copy_to_clipboard(self, text: str):
         try:
             subprocess.run(
                 ["wl-copy"], input=text.encode(), check=True, timeout=5,
+                env=self._wayland_env(),
             )
         except (subprocess.SubprocessError, FileNotFoundError):
             logger.warning("Failed to copy to clipboard")
@@ -134,7 +158,7 @@ class MurmurDaemon:
         try:
             subprocess.run(
                 ["notify-send", "Murmur", display, "-t", "4000"],
-                check=False, timeout=5,
+                check=False, timeout=5, env=self._wayland_env(),
             )
         except (subprocess.SubprocessError, FileNotFoundError):
             pass
@@ -143,7 +167,7 @@ class MurmurDaemon:
         try:
             subprocess.run(
                 ["notify-send", "Murmur", "Nothing transcribed", "-t", "2000"],
-                check=False, timeout=5,
+                check=False, timeout=5, env=self._wayland_env(),
             )
         except (subprocess.SubprocessError, FileNotFoundError):
             pass
