@@ -1,6 +1,6 @@
 [Unit]
 Description=Murmur dictation daemon (faster-whisper with GPU)
-After=graphical-session.target
+After=graphical-session-pre.target
 
 [Service]
 Type=simple
@@ -12,4 +12,4 @@ Environment=MURMUR_DEVICE=cuda
 Environment=MURMUR_COMPUTE_TYPE=float16
 
 [Install]
-WantedBy=graphical-session.target
+WantedBy=default.target
