@@ -7,7 +7,7 @@ set -euo pipefail
 
 # Defaults (same as Python config.py - keep in sync)
 MURMUR_TMPDIR="${MURMUR_TMPDIR:-/tmp}"
-MURMUR_AUDIO_SOURCE="${MURMUR_AUDIO_SOURCE:-alsa_input.usb-HP__Inc_HyperX_Cloud_II_Core_Wireless-00.mono-fallback}"
+MURMUR_AUDIO_SOURCE="${MURMUR_AUDIO_SOURCE:-@DEFAULT_AUDIO_SOURCE@}"
 MURMUR_SOCKET="${MURMUR_SOCKET:-/run/user/$(id -u)/murmur.sock}"
 
 PIDFILE="$MURMUR_TMPDIR/murmur.pid"

@@ -23,7 +23,7 @@ def get_config() -> Config:
         compute_type=os.environ.get("MURMUR_COMPUTE_TYPE", "float16"),
         audio_source=os.environ.get(
             "MURMUR_AUDIO_SOURCE",
-            "alsa_input.usb-HP__Inc_HyperX_Cloud_II_Core_Wireless-00.mono-fallback",
+            "@DEFAULT_AUDIO_SOURCE@",
         ),
         socket_path=os.environ.get(
             "MURMUR_SOCKET",
